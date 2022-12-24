@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Submit to {{title}} | Programming Problem | Volcano Judge</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  font-family: Garamond, serif;
+  margin-left: 12px;
+}
+a {
+  color: black;
+}
+</style>
+</head>
+
+<body>
+<a href="/"><img src="/static/logo.png" width="200px"></a>
+
+<div style="position: fixed; margin-left: 12px">
+<a target="_blank" href="/user/{{current_user.username}}"><h2>Welcome, {{current_user.username}}.</h2></a>
+<h1>Ongoing Contests:</h1>
+<p><a target="_blank" style="color: green" href="/contest/VJBeginner">Volcano Judge Beginner Contest (Permanent)</a></p>
+
+<h1>Upcoming Contests:</h1>
+<p>No contests have been scheduled yet.</p><br>
+
+<a href="/create-contest" target="_blank">Schedule a public contest (free)</a><br><br>
+<span>You may also host a sponsored contest.<span><br>
+<span><a href="mailto:volcanojudge@gmail.com">Contact us</a> for details.<span><br><br>
+<span>Volcano Judge &copy 2022 volcano.</span>
+</div>
+
+<center><h1>Submit to {{title}} in C++ 20</h1>
+<form action="/problem/{{code}}/submit/cpp20/result" method="POST">
+<h2>Paste code and press "Judge":</h2>
+<textarea style="width:520px; height: 400px" name="program" required>code in cpp 20</textarea><br>
+<input style="width: 320px; font-size: 32px; background-color: white" type="submit" value="Judge">
+</form></center>
+
+</body></html>

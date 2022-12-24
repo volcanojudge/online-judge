@@ -1,0 +1,17 @@
+<html>
+
+<body>
+
+<form action="/problem/{{problem.code}}/edit/result" method="POST">
+<p>Problem Statement:</p>
+<textarea class="form-control" rows="1" name="in7" required>{{problem.title}}</textarea><br>
+<textarea class="form-control" rows="1" name="in1" required>{{problem.body}}</textarea><br>
+<textarea class="form-control" rows="1" name="in5" required>{{problem.samplein}}</textarea><br>
+<textarea class="form-control" rows="1" name="in6" required>{{problem.sampleout}}</textarea><br>
+<textarea class="form-control" rows="1" name="in2" required>{{problem.sampleex}}</textarea><br>
+<textarea class="form-control" rows="1" name="in3" required>{{problem.testcase}}</textarea><br>
+<textarea class="form-control" rows="1" name="in4" required>{{problem.output}}</textarea><br>
+<input class="btn btn-primary" type="submit" value="Edit Problem">
+</form>
+
+</body></html>
