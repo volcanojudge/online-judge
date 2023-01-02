@@ -963,7 +963,7 @@ def submit_page_cpp_send(code):
     except subprocess.TimeoutExpired:
         p.kill()
         os.remove(f"{sid}.in")
-        return "Time Limit Exceeded."
+        return "Compiler Timeout"
     # Run
     in_f = open(f"{sid}.in", "r")
     try:
@@ -979,7 +979,7 @@ def submit_page_cpp_send(code):
            return "Wrong Answer"
     except subprocess.TimeoutExpired:
         p.kill()
-        return "Time Limit Exceeded."
+        return "Time Limit Exceeded"
     finally:
         in_f.close()
         os.remove(f'{sid}.o')
