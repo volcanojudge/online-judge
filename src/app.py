@@ -954,14 +954,12 @@ def submit_page_cpp_send(code):
     if expected_out[-1:] != '\n':
         expected_out += '\n'
     # Compile
-    p = None
     try:
         p = subprocess.run(['g++', '-O2', 'csandbox.c', f'{sid}.cpp', '-lseccomp', '-o', f'{sid}.o'], timeout=2)
         if p.returncode != 0:
             os.remove(f"{sid}.in")
             return "Compile Error noob did you not test your code beforehand"
     except subprocess.TimeoutExpired:
-        p.kill()
         os.remove(f"{sid}.in")
         return "Compiler Timeout"
     # Run
@@ -978,7 +976,6 @@ def submit_page_cpp_send(code):
         else:
            return "Wrong Answer"
     except subprocess.TimeoutExpired:
-        p.kill()
         return "Time Limit Exceeded"
     finally:
         in_f.close()
