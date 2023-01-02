@@ -968,8 +968,10 @@ def submit_page_cpp_send(code):
     in_f = open(f"{sid}.in", "r")
     try:
         p = subprocess.run([f'./{sid}.o'], text=True, capture_output=True, stdin=in_f, timeout=problem.timelimit)
-        if p.returncode != 0:
-            return "Invalid Return (nonzero error code)"  ## TODO detect bad syscall
+        if p.returncode == -31:
+            return "Bad syscall (killed)"
+        elif p.returncode != 0:
+            return "Invalid Return (nonzero error code)"
         output_data = p.stdout.replace("\r", "")
         if output_data == expected_out:
            return "Correct Answer but I'm too lazy to give you points"
