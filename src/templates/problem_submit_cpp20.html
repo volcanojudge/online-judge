@@ -1,41 +1,140 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Submit to {{title}} | Programming Problem | Volcano Judge</title>
+<title>Submit to {{title}} | Volcano Judge</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body {
-  font-family: Garamond, serif;
-  margin-left: 12px;
-}
-a {
-  color: black;
-}
+<link href="/static/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="/static/favicon.ico">
+    <link href="/static/offcanvas.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<style type="text/css" media="screen">
+    #editor {
+        position: fixed;
+        right: 0;
+        margin-top: 32px;
+    }
 </style>
 </head>
+<body class="bg-light">
 
-<body>
-<a href="/"><img src="/static/logo.png" width="200px"></a>
+    <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark" aria-label="Main navigation">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">volcano judge</a>
+    <button class="navbar-toggler p-0 border-0" type="button" id="navbarSideCollapse" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-<div style="position: fixed; margin-left: 12px">
-<a target="_blank" href="/user/{{current_user.username}}"><h2>Welcome, {{current_user.username}}.</h2></a>
-<h1>Ongoing Contests:</h1>
-<p><a target="_blank" style="color: green" href="/contest/VJBeginner">Volcano Judge Beginner Contest (Permanent)</a></p>
+    <div class="navbar-collapse offcanvas-collapse" id="navbarsExampleDefault">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/">Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/user/{{current_user.username}}">Profile</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/logout">Logout</a>
+        </li>
+        <li class="nav-item dropdown">
+{% if current_user.darkmode==0 %}
+          <a class="nav-link dropdown-toggle" style="cursor: pointer" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Light Mode</a>
+          <ul class="dropdown-menu" aria-labelledby="dropdown01">
+            <li><a class="dropdown-item" href="/dark-mode">Dark Mode</a></li>
+          </ul>
+{% else %}
+          <a class="nav-link dropdown-toggle" style="cursor: pointer" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Dark Mode</a>
+          <ul class="dropdown-menu" aria-labelledby="dropdown01">
+            <li><a class="dropdown-item" href="/dark-mode">Light Mode</a></li>
+          </ul>
+{% endif %}
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
 
-<h1>Upcoming Contests:</h1>
-<p>No contests have been scheduled yet.</p><br>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      jax: ["input/TeX", "output/HTML-CSS"],
+      extensions: ["tex2jax.js"],
+      "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] },
+      tex2jax: { inlineMath: [ ["$", "$"], ["\\(","\\)"] ], displayMath: [ ["$$","$$"], ["\\[", "\\]"] ], processEscapes: true, ignoreClass: "tex2jax_ignore|dno" },
+      TeX: { noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "80%" } } },
+      messageStyle: "none"
+    });
+    </script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js"></script>
 
-<a href="/create-contest" target="_blank">Schedule a public contest (free)</a><br><br>
-<span>You may also host a sponsored contest.<span><br>
-<span><a href="mailto:volcanojudge@gmail.com">Contact us</a> for details.<span><br><br>
-<span>Volcano Judge &copy 2022 volcano.</span>
+<div class="nav-scroller bg-body shadow-sm">
+  <nav class="nav nav-underline" aria-label="Secondary navigation">
+    <a class="nav-link active" aria-current="page" href="/">Dashboard</a>
+    <a class="nav-link" href="/problems">
+      Problems
+      <span class="badge bg-light text-dark rounded-pill align-text-bottom">{{problemcount}}</span>
+    </a>
+    <a class="nav-link" href="/contests">
+      Contests
+      <span class="badge bg-light text-dark rounded-pill align-text-bottom">{{contestcount}}</span>
+    </a>
+    <a class="nav-link" href="/rankings">Users</a>
+    <a class="nav-link" href="/feedback">Feedback</a>
+    <a class="nav-link" href="/contact">Contact</a>
+    <a class="nav-link" href="/about">About</a>
+  </nav>
 </div>
 
-<center><h1>Submit to {{title}} in C++ 20</h1>
-<form action="/problem/{{code}}/submit/cpp20/result" method="POST">
-<h2>Paste code and press "Judge":</h2>
-<textarea style="width:520px; height: 400px" name="program" required>code in cpp 20</textarea><br>
-<input style="width: 320px; font-size: 32px; background-color: white" type="submit" value="Judge">
-</form></center>
+<div style="margin-left: 24px; position: absolute; margin-top: 32px">
+    <h2>{{title}}</h2>
+    {% autoescape false %}
+    <p style="width: 50%">{{body}}<br><br><b>Sample Input</b>
+<br><br><code style="background-color: #dcdfe3; display: block">{{samplein}}</code><br>
+<b>Sample Output</b><br><br><code style="background-color: #dcdfe3; display: block">{{sampleout}}</code><br>
+<b>Sample Explanation</b><br><br>{{sampleex}}</p>
+    {% endautoescape %}
+    </div>
 
-</body></html>
+<div class="editor" style="height: 50%; width: 48%" id="editor"># crator will make CCO
+</div>
+
+<script src="/static/ace-files/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/solarized_light");
+    editor.session.setMode("ace/mode/c_cpp");
+    editor.resize()
+    editor.container.style.lineHeight = 2
+    editor.renderer.updateFontSize()
+    editor.setOptions({
+  fontSize: "16pt"
+});
+var editor = ace.edit('editor');
+var textarea = $('textarea[name="program"]');
+editor.getSession().on("change", function () {
+    textarea.val(editor.getSession().getValue());
+});
+
+$('#myform').submit(function() {
+    var editor = ace.edit('editor');
+    var textarea = $('textarea[name="program"]');
+    textarea.val(editor.getSession().getValue());
+    return true; // return false to cancel form action
+});
+
+</script>
+
+<script>
+function getCode() {
+    var editor = ace.edit('editor');
+  var code = editor.getValue();
+  console.log(code)
+  document.getElementById('myTextarea').value = code;
+  document.getElementById("myForm").submit();
+}
+</script>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br></b><button onclick="getCode()" type="submit" style="width: 48%; right: 0; position: fixed; display: block" class="btn btn-primary">Submit Solution</button>
+<form id="myForm" action="/problem/{{code}}/submit/cpp20/result" method="POST">
+    <textarea style="display: none;" name="program" id="myTextarea"></textarea>
+</form>
+
+</body>
+</html>

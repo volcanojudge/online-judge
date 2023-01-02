@@ -20,7 +20,6 @@ import re
 from subprocess import Popen, PIPE
 from threading import Timer
 
-
 # ASH SUBSCRIBERS
 ash=["volcano", "riolku"]
 
@@ -119,6 +118,13 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
+class Submission(db.Model):
+    __tablename__ = "submission"
+    id = db.Column(db.Integer, primary_key=True)
+    user = db.Column(db.Integer, db.ForeignKey("Login.id"))
+    prob = db.Column(db.Integer, db.ForeignKey("Problem.id"))
+
+
 @login_manager.user_loader
 def load_user(user_id):
     if user_id is not None:
@@ -152,7 +158,7 @@ def register():
         if existing_user1 is None:
             user=User(email=email, username=username, org=org)
             user.set_password(password)
-            if user.username=="" or "<" in user.org or ">" in user.org or "<" in user.email or len(user.username)>16 or "volcano" in user.username or "Volcano" in user.org or "[" in user.username or "]" in user.username or "$" in user.username or "/" in user.username or "%" in user.username or "<script>" in user.username or "Volcano" in user.username or "✔" in user.username or "'" in user.username or '"' in user.username or " " in user.username or "volcano" in user.org:
+            if re.fullmatch("[0-9A-Za-z_]{1,16}", user.username) is None or re.fullmatch("[0-9A-Za-z_ ]{1,100}", user.org) is None or re.fullmatch("[0-9A-Za-z_.]+@[0-9A-Za-z-.]+\\.[A-Za-z]+", user.email) is None or "volcano" in user.username.lower() or "volcano" in user.org.lower():
                 return redirect(request.referrer)
             else:
                 db.session.add(user)
@@ -702,13 +708,10 @@ def problem_page(code):
     p=str(problem.body)
     comm=comments.query.filter_by(problem=code).all()
     comm.reverse()
-    try:
-        if current_user.currcontest==problem.contestfor:
-            return render_template("problem.html", User=User, problem=problem, comm=comm, points=problem.points, problemcount=problemcount, contestcount=contestcount, totalcontests=0, code=code, body=p, testcase=problem.testcase, output=problem.output, authors=problem.authors, timelimit=problem.timelimit, title=problem.title, samplein=problem.samplein, sampleout=problem.sampleout, sampleex=problem.sampleex)
-        else:
-            return "This problem couldn't be found. You may be writing a contest, this problem may not exist, or you might not be logged in."
-    except:
-        return render_template("problem_no.html", User=User, problem=problem, comm=comm, points=problem.points, problemcount=problemcount, contestcount=contestcount, totalcontests=0, code=code, body=p, testcase=problem.testcase, output=problem.output, authors=problem.authors, timelimit=problem.timelimit, title=problem.title, samplein=problem.samplein, sampleout=problem.sampleout, sampleex=problem.sampleex)
+    if not problem.contestfor or current_user.currcontest==problem.contestfor:
+        return render_template("problem.html", User=User, problem=problem, comm=comm, points=problem.points, problemcount=problemcount, contestcount=contestcount, totalcontests=0, code=code, body=p, testcase=problem.testcase, output=problem.output, authors=problem.authors, timelimit=problem.timelimit, title=problem.title, samplein=problem.samplein, sampleout=problem.sampleout, sampleex=problem.sampleex)
+    else:
+        return "This problem couldn't be found. You may be writing a contest, this problem may not exist, or you might not be logged in."
 
 @app.route("/problem/<code>/edit")
 @login_required
@@ -819,6 +822,7 @@ def submit_page(code):
 @app.route("/problem/<code>/submit/python3")
 @login_required
 def submit_page_py3(code):
+    return "No"
     problemcount=problems.query.count()
     contestcount=contests.query.count()
     try:
@@ -836,6 +840,7 @@ def submit_page_py3(code):
 @app.route("/problem/<code>/submit/python3/result",methods=['GET','POST'])
 @login_required
 def submit_page_py3_send(code):
+        return "No"
         problemcount=problems.query.count()
         contestcount=contests.query.count()
         problem1=problems.query.filter_by(code=code).first()
@@ -928,79 +933,47 @@ def submit_page_cpp20(code):
 @app.route("/problem/<code>/submit/cpp20/result",methods=['GET','POST'])
 @login_required
 def submit_page_cpp_send(code):
-        if current_user.username=="volcano":
-            problem1=problems.query.filter_by(code=code).first()
-            if current_user.currcontest!=problem1.contestfor:
-                return "Some error occurred."
-            prog = request.form['program']
-            s=open("try_cpp.cpp", "w")
-            s.write(prog)
-            s.close()
-            problem=problems.query.filter_by(code=code).first()
-            s=open("cpp_input.txt", "w")
-            s.write(problem.testcase)
-            s.close()
-            c=open("cpp_input.txt", "r")
-            lines=c.readlines()
-            with open("cpp_input.txt", "w") as f:
-                for line in lines:
-                    if line != "\n":
-                        f.write(line)
-            s=open("cpp_output.txt", "w")
-            s.write(problem.output+"\n")
-            s.close()
-            c=open("cpp_output.txt", "r")
-            lines=c.readlines()
-            with open("cpp_output.txt", "w") as f:
-                for line in lines:
-                    if line != "\n":
-                        f.write(line)
-            try:
-                r=open("cpp_input.txt", "r")
-                Popen(['g++', "try_cpp.cpp", "-o", "a.out"])
-                try:
-                    p = Popen(['./a.out'], stdout=PIPE, stdin=PIPE)
-                except:
-                    try:
-                        p = Popen(['./a.out'], stdout=PIPE, stdin=PIPE)
-                    except:
-                        try:
-                            p = Popen(['./a.out'], stdout=PIPE, stdin=PIPE)
-                        except:
-                            try:
-                                time.sleep(3)
-                                p = Popen(['./a.out'], stdout=PIPE, stdin=PIPE)
-                            except:
-                                return "Invalid Return"
-                st=""
-                for line in r.readlines():
-                    st=st+line
-                    p.stdin.write(bytes(line,'UTF-8'))
-                p.stdin.write(bytes("\n", "UTF-8"))
-                p.stdin.flush()
-                time.sleep(problem.timelimit)
-                p.kill()
-                result="TLE"
-                result = p.stdout.readlines()
-                final=""
-                for res in result:
-                    final=final+str(res)
-                correct_output="b'"+problem.output+"'"
-                os.remove("a.out")
-                os.remove("try_cpp.cpp")
-                if str(result)==correct_output:
-                    return "Correct Answer"
-                elif str(result)=="b''":
-                    return "Program Timeout"
-                else:
-                    #return "Wrong Answer"
-                    return str(final).replace("b'", "").replace("\n", "") +" "+correct_output
-            except TimeoutError:
-                return "Time Limit Exceeded. Points NOT awarded."
-            except subprocess.CalledProcessError as e:
-                return "Invalid Return. Points NOT awarded."
-            w=open("cpp_output.txt", "w")
-            w.close()
+    problem=problems.query.filter_by(code=code).first()
+    if problem.contestfor and current_user.currcontest!=problem.contestfor:
+        return "Some error occurred."
+    prog = request.form['program']
+    if len(prog) == 0 or len(prog) > 32768:
+        return "Size matters (min size = 1 char, max size = 32768 chars)"
+    sub = Submission(user=current_user.id, prob=problem.id)
+    db.session.add(sub)
+    db.session.commit()
+    sid = sub.id
+    with open(f"{sid}.cpp", "w") as sub_f:
+        sub_f.write(prog)
+    input_data = problem.testcase.replace("\r", "")
+    if input_data[-1:] != '\n':
+        input_data += '\n'
+    with open(f"{sid}.in", "w") as in_f:
+        in_f.write(input_data)
+    expected_out = problem.output.replace("\r", "")
+    if expected_out[-1:] != '\n':
+        expected_out += '\n'
+    p = None
+    in_f = open(f"{sid}.in", "r")
+    try:
+        compile = subprocess.run(['g++', '-O2', 'csandbox.c', f'{sid}.cpp', '-lseccomp', '-o', f'{sid}.o'])
+        if compile.returncode != 0:
+            return "Compile Error noob did you not test your code beforehand"
+        p = subprocess.run([f'./{sid}.o'], text=True, capture_output=True, stdin=in_f, timeout=problem.timelimit)
+        if p.returncode != 0:
+            return "Invalid Return (nonzero error code)"  ## TODO detect bad syscall
+        output_data = p.stdout.replace("\r", "")
+        os.remove(f'{sid}.o')
+        if output_data == expected_out:
+           return "Correct Answer but I'm too lazy to give you points"
+        else:
+           return "Wrong Answer"
+    except TimeoutError:
+        p.kill()
+        return "Time Limit Exceeded."
+    finally:
+        in_f.close()
+        os.remove(f"{sid}.in")
 
 @app.route("/basalt-license")
 def basalt_license():

@@ -125,7 +125,7 @@
   </thead>
   <tbody>
 {% for problem in prob %}
-{% if problem.contestfor=="None" %}
+{% if not problem.contestfor %}
     <tr>
       <th><a href="/problem/{{problem.code}}">{{problem.title}}</a></th>
       <td>{{problem.points}}</td>

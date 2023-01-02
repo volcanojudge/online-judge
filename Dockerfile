@@ -2,7 +2,7 @@ FROM python:slim
 
 RUN useradd --create-home volcano
 RUN apt update
-RUN apt install -y g++
+RUN apt install -y g++ libseccomp-dev sqlite3
 
 USER volcano
 RUN mkdir /home/volcano/judge
