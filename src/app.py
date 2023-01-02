@@ -28,6 +28,7 @@ upload_profile = "./static/images/profile"
 app = Flask(__name__, static_folder='./static')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['UPLOAD_PROFILE'] = upload_profile
+app.config['SECRET_KEY'] = open('secret_key.txt', 'r').read()
 login_manager = LoginManager()
 login_manager.init_app(app)
 db=SQLAlchemy(app)
@@ -1022,7 +1023,5 @@ def p_news():
     else:
         abort(403)
 
-with db.engine.begin() as conn:
-    conn.execute("VACUUM")
-
-db.create_all()
+with app.app_context():
+  db.create_all()
