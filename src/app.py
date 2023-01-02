@@ -953,26 +953,34 @@ def submit_page_cpp_send(code):
     expected_out = problem.output.replace("\r", "")
     if expected_out[-1:] != '\n':
         expected_out += '\n'
+    # Compile
     p = None
+    try:
+        p = subprocess.run(['g++', '-O2', 'csandbox.c', f'{sid}.cpp', '-lseccomp', '-o', f'{sid}.o'], timeout=2)
+        if p.returncode != 0:
+            os.remove(f"{sid}.in")
+            return "Compile Error noob did you not test your code beforehand"
+    except subprocess.TimeoutExpired:
+        p.kill()
+        os.remove(f"{sid}.in")
+        return "Time Limit Exceeded."
+    # Run
     in_f = open(f"{sid}.in", "r")
     try:
-        compile = subprocess.run(['g++', '-O2', 'csandbox.c', f'{sid}.cpp', '-lseccomp', '-o', f'{sid}.o'])
-        if compile.returncode != 0:
-            return "Compile Error noob did you not test your code beforehand"
         p = subprocess.run([f'./{sid}.o'], text=True, capture_output=True, stdin=in_f, timeout=problem.timelimit)
         if p.returncode != 0:
             return "Invalid Return (nonzero error code)"  ## TODO detect bad syscall
         output_data = p.stdout.replace("\r", "")
-        os.remove(f'{sid}.o')
         if output_data == expected_out:
            return "Correct Answer but I'm too lazy to give you points"
         else:
            return "Wrong Answer"
-    except TimeoutError:
+    except subprocess.TimeoutExpired:
         p.kill()
         return "Time Limit Exceeded."
     finally:
         in_f.close()
+        os.remove(f'{sid}.o')
         os.remove(f"{sid}.in")
 
 @app.route("/basalt-license")
